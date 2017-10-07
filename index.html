@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Giftastic!</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery.js"></script>
+</head>
+
+<body>
+    <div id="RenderedButtons"></div>
+    <form id="gifadd">
+        <div class="row">
+            <div class="col-sm-9" id="buttonanimal"></div>
+            <div class="col-sm-3">
+                <label for="inputimage">Enter animal:</label>
+                <input type="text" id="addimage">
+                <input id="addimage" class="btn btn-primary btn-block button-submit" type="submit" value="Submit">
+                </button>
+    </form>
+    </div>
+    </div>
+    </div>
+    <div id="gifs-go-here"></div>
+    <script type="text/javascript">
+    var wildanimals = ["Giraffe", "Rhino", "Bob Cat", "Wolf", "Sheep", "Camel", "Cow", "Lamb", "Goat", "Zebra", "Snake"];
+
+    function renderButtons() {
+     
+        $("#RenderedButtons").empty();
+        for (var i = 0; i < wildanimals.length; i++) {
+            var a = $("<button>");
+            a.addClass("animal");
+            a.attr("data-name", wildanimals[i]);
+            a.text(wildanimals[i]);
+
+            $("#RenderedButtons").append(a);
+        }
+    }
+
+    $('#addimage').on('click', function(event) {
+        event.preventDefault();
+        userInput = $('#gifadd').val().trim();
+        console.log(userInput);
+        wildanimals.push(userInput);
+        console.log(wildanimals);
+        renderButtons();
+    })
+
+
+    $(document).on('click', ".animal", function() {
+        var x = $(this).data("name");
+        console.log(x);
+
+        var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + x + "&api_key=tg6OJdRUcEtjX8RqCP7eL5wvKBudV4R4";
+        $.ajax({ url: queryURL, method: "GET" })
+            .done(function(response) {
+                console.log(response);
+
+  
+                for (var i = 0; i < response.data.length; i++) {
+
+                    var divanimal = $('<div>');
+
+                    var p = $('<p>').text("Rating: " + response.data[i].rating);
+
+                    var animalImage = $('<img>');
+                    animalImage.attr('src', response.data[i].images.fixed_height_still.url.replace(/^http:\/\//i, 'https://'));
+                    animalImage.attr('data-still', response.data[i].images.fixed_height_still.url.replace(/^http:\/\//i, 'https://'));
+                    animalImage.attr('data-animate', response.data[i].images.fixed_height.url.replace(/^http:\/\//i, 'https://'));
+                    animalImage.attr('data-state', "still");
+                    animalImage.addClass("gif");
+
+                    divanimal.append(p);
+                    divanimal.append(animalImage);
+                    $('#gifs-go-here').prepend(divanimal);
+
+
+                } 
+
+                $(document).on("click", "img", function() {
+
+                    var state = $(this).attr("data-state");
+
+                    if (state === "still") {
+                        $(this).attr("src", $(this).attr("data-animate"));
+                        $(this).attr("data-state", "animate");
+                    } else {
+                        $(this).attr("src", $(this).attr("data-still"));
+                        $(this).attr("data-state", "still");
+                    }
+                })
+            })
+
+
+    })
+
+    renderButtons();
+    </script>
+</body>
+
+</html>
